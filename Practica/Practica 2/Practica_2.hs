@@ -46,7 +46,6 @@
      
 -}
 
-alpha x = x
 
 {- Por que no anda?
 smallest = \x -> (\y -> (\z -> if (x<=y && x<=z)
@@ -55,3 +54,21 @@ smallest = \x -> (\y -> (\z -> if (x<=y && x<=z)
 							        then y 
 							        else z))
 -}
+
+
+--Ejercicio 13
+divisors :: Integral a => a -> [a]
+divisors x
+	| x > 0 = [y | y <- [1..x], mod x y == 0]
+
+matches :: Integral a => a -> [a] -> [a]
+matches x l = [y | y <- l, x == y]
+
+cuadruplas :: Integral a => a -> [(a,a,a,a)]
+cuadruplas n
+	| n >= 0 = [(a,b,c,d) | a <- l, b <- l, c <- l, d <- l, a^2 + b^2 == c^2 + d^2]
+		where l = [1..n]
+
+--Tomasu asqueroso
+unique :: [a] -> [a]
+unique xs = [x | (x,i) <- zip xs [0..], not(elem x (take i xs)) ]
