@@ -136,3 +136,43 @@ data BinTree a = EmptyB | NodeB (BinTree a) a (BinTree a) deriving Show
 -- ~ g2bt EmptyG = EmptyB
 -- ~ g2bt (NodeG a []) = NodeB EmptyB a EmptyB
 -- ~ g2bt (NodeG a (x:xs)) = NodeB x a 
+
+--Ejercicio 7
+minBST:: Bin a -> a
+minBST (Nodo Hoja a r) = a
+minBST (Nodo l a r) = minBST l
+
+maxBST:: Bin a -> a
+maxBST (Nodo l a Hoja) = a
+maxBST (Nodo l a r) = maxBST r
+
+--If it's stupid but it works, it ain't stupid :)
+checkBST:: Ord a => Bin a -> Bool
+checkBST Hoja = True
+checkBST (Nodo Hoja a Hoja) = True
+checkBST (Nodo l a Hoja) = a >= (maxBST l) && (checkBST l)
+checkBST (Nodo Hoja a r) = a <= (minBST r) && (checkBST r)
+checkBST (Nodo l a r) = (a <= (minBST r)) && (checkBST r) && (a >= (maxBST l)) && (checkBST l)
+
+
+--Ejercicio 8
+memberBST :: Ord a => a -> Bin a -> Bool
+memberBST _ Hoja = False
+memberBST x (Nodo l a r)
+	| a == x = True
+	| a > x  = memberBST x r
+	| a < x  = memberBST x l
+
+
+--Version que pide el enunciado
+memberBSTAux :: Ord a => a -> a -> Bin a -> Bool
+memberBSTAux x cand Hoja = x == cand
+memberBSTAux x cand (Nodo l d r)
+	| d <= x    = memberBSTAux x d r
+	| otherwise = memberBSTAux x cand l
+
+memberBST :: Ord a => a -> Bin a -> Bool
+memberBST _ Hoja = False
+memberBST x arbol@(Nodo l d r) = memberBSTAux x d arbol
+
+
