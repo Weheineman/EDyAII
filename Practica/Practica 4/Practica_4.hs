@@ -36,6 +36,7 @@ del (cons y ys) x = cons y (del ys x)  	en otro caso
 
 --Ejercicio 2
 tad Pila (A:Set) where
+	import Bool
 	empty : Pila A
 	push : a -> Pila A -> Pila A
 	isEmpty : Pila A -> Bool
@@ -79,24 +80,52 @@ esVacio (insertar x c) = False
 union (insertar x c) vacio = (insertar x c)
 union vacio (insertar x c) = (insertar x c)
 union (insertar x c1) (insertar y c2) = insertar x (insertar y (union c1 c2))
-interseccion vacio c2 = vacio
-interseccion c1 vacio = vacio
-interseccion c1 c2 = vacio
-interseccion (insertar x c1) (insertar y c2) = 
 resta vacio c2 = vacio
 resta c1 vacio = c1
 resta c1 (insertar x c2) = resta (borrar x c1) c2
+interseccion c1 c2 = resta (union c1 c2) (union (resta c1 c2) (resta c2 c1))
 
-????????????????????????
+Por el comportamiento especificado:
+	insertar x (insertar y c) = insertar x c				si x=y
+La funcion choose tendria comportamiento indeterminado.
 
 --Ejercicio 4
-tad PriorityQueue (A:Set) where
-	vacia : PriorityQueue A
-	poner : A -> 
-	primero : PriorityQueue A -> A
-	sacar : PriorityQueue A -> PriorityQueue A
-	esVacia : PriorityQueue A -> Bool
-	union : PriorityQueue A -> PriorityQueue A -> PriorityQueue A
+tad PriorityQueue (A:Set, B:Ordered Set) where
+	import Bool
+	vacia : PriorityQueue (A, B)
+	poner : (A, B) -> PriorityQueue (A, B)
+	primero : PriorityQueue (A, B) -> (A, B)
+	sacar : PriorityQueue (A, B) -> PriorityQueue (A, B)
+	esVacia : PriorityQueue (A, B) -> Bool
+	union : PriorityQueue (A, B) -> PriorityQueue (A, B) -> PriorityQueue (A, B)
 	
-Es
+Especificacion Algebraica
+poner (a1, b1) (poner (a2, b2) q) = poner (a1, b1) (poner (a2, b2) q)	si b1 >= b2
+poner (a1, b1) (poner (a2, b2) q) = poner (a2, b2) (poner (a1, b1) q)	si b1 < b2
+primero (poner (a, b) q) = (a, b)
+sacar (poner (a, b) q) = q
+esVacia vacia = True
+esVacia (poner (a, b) q) = False
+union vacia q2 = q2
+union (poner (a, b) q1) q2 = poner (a, b) (union q1 q2)
+
+Especificacion con modelo de Conjuntos
+vacia {}
+poner (a, b) {(a1, b1), ..., (an, bn)} = {(a,b)} U {(a1, b1), ..., (an, bn)}
+primero {(a1, b1), ..., (an, bn)} = (a,b)	si b>=bi para todo i en [1,n]
+sacar PQ = PQ - {primero PQ}
+esVacia {(a1, b1), ..., (an, bn)} = n==0
+union {} PQ = PQ
+union {(a1, b1), ..., (an, bn)} PQ = poner (a1, b1) (union {(a2, b2), ..., (an, bn)} PQ) 
+
+
+--Ejercicio 5 (Jebaited)
+tad BalT (A:Ordered Set) where
+	import Maybe
+	empty : BalT A
+	join : BalT A -> Maybe A -> BalT A -> BalT A
+	size : BalT A -> N
+	expose : BalT A -> Maybe (BalT A,A,BalT A)
+	
+
 -}
