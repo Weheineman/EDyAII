@@ -1,38 +1,48 @@
-{- Implementación del TAD secuencia -}
 module ListSeq where
 
 import Seq
 import Par
 
 
---Genera la lista al reves (pues agregar al principio es mas eficiente)
+-- ~ Genera la lista al reves (pues agregar al principio es mas eficiente)
 auxTabulateS :: (Int -> a) -> Int -> [a]
 auxTabulateS f 0 = [f 0]
 auxTabulateS f n = x:xs
-    where (x,xs) = (f n) ||| (auxTabulateS f (n-1))
+  where (x,xs) = f n ||| auxTabulateS f (n-1)
+    
+contractL :: (a -> a -> a) -> [a] -> [a]
+contractL f []         = []
+contractL f [x]        = [x]
+contractL f (x1:x2:xs) =
+    let (y,ys) = f x1 x2 ||| contractL f xs
+    in  y:ys
+    
+-- ~ HACER
+expandL = id
 
 instance Seq [] where
     emptyS = []
     
     singletonS x = [x]
     
-    lengthS xs = length xs
+    lengthS = length
     
     nthS (x:xs) n
         | n==0      = x
         | otherwise = nthS xs (n-1)
     
+    -- ~ Confio en que reverse es O(n)
     tabulateS f n    = reverse $ auxTabulateS f (n-1)
     
     mapS f []        = []
     mapS f (x:xs)    = y:ys
-        where (y,ys) = (f x) ||| (mapS f xs)
+        where (y,ys) = f x ||| mapS f xs
     
     filterS f [] = []
     filterS f (x:xs)
-        | check     = x:ys
+        | valid     = x:ys
         | otherwise = ys
-      where (check, ys) = (f x) ||| (filterS f xs)
+      where (valid, ys) = f x ||| filterS f xs
     
     appendS = (++)
     
@@ -40,14 +50,25 @@ instance Seq [] where
     
     dropS xs n = drop n xs
     
+    -- ~ Paralelizar no mejora la complejidad, pero confio en que es mas rapido
     showtS []   = EMPTY
     showtS [x]  = ELT x
-    --No se como dividirlo pls askerino
-    showtS xs   = NODE (takeS xs l) (dropS xs l)
-      where l = quot (lengthS xs) 2
+    showtS xs   =
+        let len    = quot (lengthS xs) 2
+            (l, r) = takeS xs len ||| dropS xs len
+        in  NODE l r
     
     showlS []       = NIL
     showlS (x:xs)   = CONS x xs
         
-    fromList xs = xs
+    joinS = concat
+    
+    reduceS f b []  = b
+    reduceS f b [x] = f b x
+    reduceS f b xs  = reduceS f b $ contractL f xs
+    
+    -- ~ HACER
+    -- ~ scanS = id
+    
+    fromList = id
     
