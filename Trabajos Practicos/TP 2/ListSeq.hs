@@ -16,9 +16,13 @@ contractL f [x]        = [x]
 contractL f (x1:x2:xs) =
     let (y,ys) = f x1 x2 ||| contractL f xs
     in  y:ys
-    
--- ~ HACER
-expandL = id
+
+expandL :: (a -> a -> a) -> [a] -> [a] -> [a]
+expandL f [] _             = []
+expandL f [x] (y:ys)        = [y]
+expandL f (x1:x2:xs) (y:ys) =
+    let (z, zs) = f y x1 ||| expandL f xs ys
+    in  y:z:zs
 
 instance Seq [] where
     emptyS = []
@@ -67,8 +71,12 @@ instance Seq [] where
     reduceS f b [x] = f b x
     reduceS f b xs  = reduceS f b $ contractL f xs
     
-    -- ~ HACER
-    -- ~ scanS = id
+    scanS f b []  = ([], b)
+    scanS f b [x] = ([b], f b x)
+    scanS f b xs  =
+        let cl        = contractL f xs
+            (pl, res) = scanS f b cl
+        in  (expandL f xs pl, res)
     
     fromList = id
     
